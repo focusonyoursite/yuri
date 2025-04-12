@@ -2,6 +2,7 @@
 
 import { env } from '@/env';
 import { parseError } from '@repo/observability/error';
+import { addEventToCalendar } from '@/lib/google-calendar';
 
 export const booking = async (
   name: string,
@@ -14,6 +15,9 @@ export const booking = async (
   error?: string;
 }> => {
   try {
+    // Voeg event toe aan Google Calendar
+    await addEventToCalendar(name, email, phone, date, time, notes);
+
     // E-mail naar beheerder
     const adminResponse = await fetch('https://api.improvmx.com/v3/emails/send', {
       method: 'POST',
@@ -62,6 +66,7 @@ Tijd: ${time}
 ${phone ? `Telefoon: ${phone}` : ''}
 ${notes ? `Opmerkingen: ${notes}` : ''}
 
+Je ontvangt binnenkort een Google Calendar uitnodiging voor deze afspraak.
 Ik neem zo snel mogelijk contact met je op om de afspraak te bevestigen.
 
 Met vriendelijke groet,
