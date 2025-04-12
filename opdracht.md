@@ -20,10 +20,15 @@
 - [x] Layout met header en footer
 - [x] Animaties met Framer Motion
 
+### E-mail integratie
+- [x] ImprovMX setup voor e-mailformulieren (overstap van Resend)
+- [x] Contact formulier e-mails
+- [x] Boekingsformulier e-mails
+- [x] E-mail templates voor contact en boekingen
+
 ## Nog te doen
 
 ### Technisch
-- [ ] ImprovMX setup voor e-mailformulieren
 - [ ] Google Calendar integratie voor boekingen
 - [ ] Stripe integratie voor betalingen
 - [ ] Vercel deployment configureren

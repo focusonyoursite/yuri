@@ -1,5 +1,8 @@
+'use client';
+
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import { booking } from '../app/[locale]/boeken/actions/booking'
 
 type FormData = {
   name: string
@@ -22,7 +25,7 @@ export default function BookingForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
-  const [errors, setErrors] = useState<Partial<FormData>>({})
+  const [error, setError] = useState<string>()
 
   const validateForm = () => {
     const newErrors: Partial<FormData> = {}
@@ -36,7 +39,6 @@ export default function BookingForm() {
       newErrors.email = 'Ongeldig e-mailadres'
     }
 
-    setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
@@ -46,12 +48,22 @@ export default function BookingForm() {
     if (!validateForm()) return
     
     setIsSubmitting(true)
+    setError(undefined)
     
-    // Voor nu alleen console.log
-    console.log('Form submitted:', formData)
-    
-    // Simuleer een API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const result = await booking(
+      formData.name,
+      formData.email,
+      formData.phone || undefined,
+      formData.date,
+      formData.time,
+      formData.notes || undefined
+    )
+
+    if (result.error) {
+      setError(result.error)
+      setIsSubmitting(false)
+      return
+    }
     
     setIsSubmitting(false)
     setShowSuccess(true)
@@ -84,10 +96,17 @@ export default function BookingForm() {
           className="text-center py-8"
         >
           <h3 className="text-2xl text-green-600 mb-4">Bedankt voor je boeking!</h3>
-          <p className="text-stone-600">We nemen snel contact met je op.</p>
+          <p className="text-stone-600">
+            Je ontvangt zo snel mogelijk een bevestiging per e-mail.
+          </p>
         </motion.div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="p-4 bg-red-50 text-red-600 rounded-md">
+              {error}
+            </div>
+          )}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-stone-700">
               Naam *
@@ -95,15 +114,12 @@ export default function BookingForm() {
             <input
               type="text"
               id="name"
+              required
               value={formData.name}
               onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              className={`mt-1 block w-full rounded-md shadow-sm ${
-                errors.name ? 'border-red-300' : 'border-stone-300'
-              } focus:border-stone-500 focus:ring-stone-500`}
+              className="mt-1 block w-full rounded-md border-stone-300 shadow-sm 
+              focus:border-stone-500 focus:ring-stone-500"
             />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-            )}
           </div>
 
           <div>
@@ -113,15 +129,12 @@ export default function BookingForm() {
             <input
               type="email"
               id="email"
+              required
               value={formData.email}
               onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              className={`mt-1 block w-full rounded-md shadow-sm ${
-                errors.email ? 'border-red-300' : 'border-stone-300'
-              } focus:border-stone-500 focus:ring-stone-500`}
+              className="mt-1 block w-full rounded-md border-stone-300 shadow-sm 
+              focus:border-stone-500 focus:ring-stone-500"
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-            )}
           </div>
 
           <div>
@@ -133,7 +146,8 @@ export default function BookingForm() {
               id="phone"
               value={formData.phone}
               onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-              className="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-stone-500 focus:ring-stone-500"
+              className="mt-1 block w-full rounded-md border-stone-300 shadow-sm 
+              focus:border-stone-500 focus:ring-stone-500"
             />
           </div>
 
@@ -145,15 +159,12 @@ export default function BookingForm() {
               <input
                 type="date"
                 id="date"
+                required
                 value={formData.date}
                 onChange={e => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                className={`mt-1 block w-full rounded-md shadow-sm ${
-                  errors.date ? 'border-red-300' : 'border-stone-300'
-                } focus:border-stone-500 focus:ring-stone-500`}
+                className="mt-1 block w-full rounded-md border-stone-300 shadow-sm 
+                focus:border-stone-500 focus:ring-stone-500"
               />
-              {errors.date && (
-                <p className="mt-1 text-sm text-red-600">{errors.date}</p>
-              )}
             </div>
 
             <div>
@@ -163,15 +174,12 @@ export default function BookingForm() {
               <input
                 type="time"
                 id="time"
+                required
                 value={formData.time}
                 onChange={e => setFormData(prev => ({ ...prev, time: e.target.value }))}
-                className={`mt-1 block w-full rounded-md shadow-sm ${
-                  errors.time ? 'border-red-300' : 'border-stone-300'
-                } focus:border-stone-500 focus:ring-stone-500`}
+                className="mt-1 block w-full rounded-md border-stone-300 shadow-sm 
+                focus:border-stone-500 focus:ring-stone-500"
               />
-              {errors.time && (
-                <p className="mt-1 text-sm text-red-600">{errors.time}</p>
-              )}
             </div>
           </div>
 
@@ -184,7 +192,8 @@ export default function BookingForm() {
               rows={4}
               value={formData.notes}
               onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-              className="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-stone-500 focus:ring-stone-500"
+              className="mt-1 block w-full rounded-md border-stone-300 shadow-sm 
+              focus:border-stone-500 focus:ring-stone-500"
             />
           </div>
 

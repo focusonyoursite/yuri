@@ -1,5 +1,8 @@
+'use client';
+
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import { contact } from './actions/contact'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -9,16 +12,20 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [error, setError] = useState<string>()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError(undefined)
 
-    // Voor nu alleen console.log
-    console.log('Contact form submitted:', formData)
+    const result = await contact(formData.name, formData.email, formData.message)
 
-    // Simuleer een API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    if (result.error) {
+      setError(result.error)
+      setIsSubmitting(false)
+      return
+    }
 
     setIsSubmitting(false)
     setShowSuccess(true)
@@ -139,6 +146,11 @@ export default function ContactPage() {
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {error && (
+                    <div className="p-4 bg-red-50 text-red-600 rounded-md">
+                      {error}
+                    </div>
+                  )}
                   <div>
                     <label
                       htmlFor="name"
